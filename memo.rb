@@ -24,7 +24,8 @@ end
 post '/memos/new_memo/add_new' do
   memos = file
 	@memo = memos[params[:id]]
-  next_id = memos.max[0].to_i + 1
+  num = memos.keys.map{|id| id.to_i}
+  next_id = num.max + 1
   memos.store(next_id, {title: params[:title], comment: params[:comment]})
   File.open("public/memos.json", "w") do |file|
     JSON.dump(memos, file)
