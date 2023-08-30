@@ -1,25 +1,36 @@
+# frozen_string_literal: true
+
 require 'sinatra'
 require 'json'
 require 'cgi'
-
 
 def escape_text(text)
   CGI.escapeHTML(text)
 end
 
 def file
-  File.open("public/memos.json") do |f|
-  	JSON.load(f)
+  JSON.load_file('public/memos.json')
+end
+
+def memo
+  memos = file
+  @memo = memos[params[:id]]
+  [memos, @memo]
+end
+
+def write_json(memos)
+  File.open('public/memos.json', 'w') do |file|
+    JSON.dump(memos, file)
   end
 end
 
 get '/' do
-    redirect '/memos'
+  redirect '/memos'
 end
 
 get '/memos' do
-	@memos = file
-	erb :index
+  @memos = file
+  erb :index
 end
 
 get '/memos/new_memo' do
@@ -27,53 +38,38 @@ get '/memos/new_memo' do
 end
 
 post '/memos/new_memo/add_new' do
-  memos = file
-	@memo = memos[params[:id]]
-  num = memos.keys.map{|id| id.to_i}
-  if memos.empty?
-    next_id = 0
-  else
-    next_id = num.max + 1
-  end
-  memos.store(next_id, {title: escape_text(params[:title]), comment: escape_text(params[:comment])})
-  File.open("public/memos.json", "w") do |file|
-    JSON.dump(memos, file)
-  end
+  memos, @memo = memo
+  num = memos.keys.map(&:to_i)
+  next_id = memos.empty? ? 0 : num.max + 1
+  memos.store(next_id, { title: escape_text(params[:title]), comment: escape_text(params[:comment]) })
+  write_json(memos)
   redirect '/memos'
 end
 
 get '/memos/:id' do
-	memos = file
-	@memo = memos[params[:id]]
+  memo
   @id = params[:id]
   erb :show_memo
 end
 
 get '/memos/:id/edit_memo' do
-  memos = file
-	@memo = memos[params[:id]]
+  memo
   @id = params[:id]
   erb :edit_memo
 end
 
 patch '/memos/:id' do
-  memos = file
-	@memo = memos[params[:id]]
+  memos, @memo = memo
   id = params[:id]
-  memos.store(id, {title: escape_text(params[:title]), comment: escape_text(params[:comment])})
-  File.open("public/memos.json", "w") do |file|
-    JSON.dump(memos, file)
-  end
+  memos.store(id, { title: escape_text(params[:title]), comment: escape_text(params[:comment]) })
+  write_json(memos)
   p memos
   redirect "/memos/#{id}"
 end
 
 delete '/memos/:id' do
-  memos = file
-	@memo = memos[params[:id]]
+  memos, @memo = memo
   memos.delete(params[:id])
-  File.open("public/memos.json", "w") do |file|
-    JSON.dump(memos, file)
-  end
+  write_json(memos)
   redirect '/memos'
 end
