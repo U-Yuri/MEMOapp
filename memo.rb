@@ -1,6 +1,11 @@
 require 'sinatra'
 require 'json'
-require 'debug'
+require 'cgi'
+
+
+def escape_text(text)
+  CGI.escapeHTML(text)
+end
 
 def file
   File.open("public/memos.json") do |f|
@@ -30,7 +35,7 @@ post '/memos/new_memo/add_new' do
   else
     next_id = num.max + 1
   end
-  memos.store(next_id, {title: params[:title], comment: params[:comment]})
+  memos.store(next_id, {title: escape_text(params[:title]), comment: escape_text(params[:comment])})
   File.open("public/memos.json", "w") do |file|
     JSON.dump(memos, file)
   end
@@ -55,7 +60,7 @@ patch '/memos/:id' do
   memos = file
 	@memo = memos[params[:id]]
   id = params[:id]
-  memos.store(id, {title: params[:title], comment: params[:comment]})
+  memos.store(id, {title: escape_text(params[:title]), comment: escape_text(params[:comment])})
   File.open("public/memos.json", "w") do |file|
     JSON.dump(memos, file)
   end
