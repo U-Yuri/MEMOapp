@@ -51,7 +51,7 @@ patch '/memos/:id' do
   memos = file
 	@memo = memos[params[:id]]
   id = params[:id]
-  memos.store(999, {title: params[:title], comment: params[:comment]})
+  memos.store(id, {title: params[:title], comment: params[:comment]})
   File.open("public/memos.json", "w") do |file|
     JSON.dump(memos, file)
   end
