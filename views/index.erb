@@ -1,10 +1,10 @@
 <header>
-	<h1>メモアプリ</h1>
-	<a href="/memos/new_memo" class="add_button">追加</a>
+<h1>メモアプリ</h1>
+<a href="/memos/new_memo" class="add_button">追加</a>
 </header>
 
 <ul>
 <% @memos.each do |id, f| %>
-	<li><a href="/memos/<%= id %>"><%= f["title"] %></a></li>
-	<% end %>
+<li><a href="/memos/<%= id %>"><%= f["title"] %></a></li>
+<% end %>
 </ul>
